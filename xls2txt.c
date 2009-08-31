@@ -626,10 +626,10 @@ void print_sheet(int o, u8 *name, int nr)
 				print_rk(g16(p+4), g32(p+6));
 			break;
 		case 0xBD: { // MULRK
-				unsigned xf = g16(p+4);
 				u8 *q = p + rr.l - 11;
 				int f = to_cell_p(p);
 				for(;;) {
+					unsigned xf = g16(p+4);
 					p += 6;
 					if(f) print_rk(xf, g32(p));
 					if(p>=q) break;
