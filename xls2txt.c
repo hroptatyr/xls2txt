@@ -399,66 +399,84 @@ again:
 
 static void print_time(int m, int f, double v);
 
-static void print_fmt(unsigned xf, double v)
+static void
+print_fmt(unsigned xf, double v)
 {
 	const struct fmt *f;
 
-	if(g.nofmt) {
+	if (g.nofmt) {
 		printf("%f", v);
 		return;
 	}
 
-	if(xf < x.xf_fmt.nelem) {
+	if (xf < x.xf_fmt.nelem) {
 		f = TAB(x.xf_fmt, struct fmt*, xf);
-		if(f) goto have_fmt;
+		if (f) {
+			goto have_fmt;
+		}
 	}
 	f = fmt_from_xf(xf);
 have_fmt:
 
-	switch(f->type) {
+	switch (f->type) {
 	case 0:
-		if(ceil(v)==v) {
+		if (ceil(v)==v) {
 			printf("%.f", v);
 			break;
 		}
 	default:
 		printf("%f", v);
 		break;
-	case 1: printf("%.*f", f->arg, v); break;
-	case 2: printf("%.*E", f->arg, v); break;
+	case 1:
+		printf("%.*f", f->arg, v);
+		break;
+	case 2:
+		printf("%.*E", f->arg, v);
+		break;
 	case 3:
 	case 4:
-	case 5: print_time(f->type-2, f->arg, v); break;
+	case 5:
+		print_time(f->type-2, f->arg, v);
+		break;
 	}
+	return;
 }
 
-static void print_time(int m, int f, double v)
+static void
+print_time(int m, int f, double v)
 {
 	int d;
 	time_t t;
 	struct tm *tm;
 
-	d = v; v -= d;
-	if(x.e1904)
+	d = v;
+	v -= d;
+	if (x.e1904) {
 		d += 4*365;
-	else if(d<=60)
+	} else if (d <= 60) {
 		d++;
+	}
 	d -= 25569;
 
 	t = d*24*60*60 + (unsigned)(v*24*60*60);
 	tm = gmtime(&t);
-	if(!tm) {
+	if (!tm) {
 		printf("#BAD"); // XXX
 		return;
 	}
-	if(m==3 && !f && !v)
+	if (m==3 && !f && !v) {
 		m = 1;
-	if(m&1) {
-		printf("%04u-%02u-%02u", tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
-		if(m==1) return;
+	}
+	if (m&1) {
+		printf("%04u-%02u-%02u",
+		       tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+		if (m==1) {
+			return;
+		}
 		printf(" ");
 	}
 	printf("%2u:%02u:%02u", tm->tm_hour, tm->tm_min, tm->tm_sec);
+	return;
 }
 
 static void
