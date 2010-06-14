@@ -310,7 +310,7 @@ parse_fmt(struct fmt *f, u16 *p, int l)
 			return;
 		}
 	}
-	if (*p == 'Y'|| *p == 'M'|| *p == 'D') {
+	if (*p == 'Y' || *p == 'M' || *p == 'D' || *p == 'd') {
 		f->type = 5;
 		return;
 	}
