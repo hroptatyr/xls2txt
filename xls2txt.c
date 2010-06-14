@@ -616,25 +616,32 @@ void print_sheet(int o, u8 *name, int nr)
 		u8 *p;
 
 		GETRR(p)
-		if(rr.id == 0x0A && !p[-3]) // EOF
+		if (rr.id == 0x0A && !p[-3]) {
+			// EOF
 			break;
+		}
 
 		switch(rr.id) {
 		case 0x09: // BOF
-			if(p[-3]>=0x10) break;
+			if (p[-3]>=0x10) {
+				break;
+			}
 			rr.o = skip_substream(rr.o);
 			break;
 		case 0x04: // LABEL
-			if(to_cell_p(p))
+			if (to_cell_p(p)) {
 				print_str(p+8, g16(p+6));
+			}
 			break;
 		case 0xFD: // LABELSST
-			if(to_cell_p(p))
+			if (to_cell_p(p)) {
 				print_sst(g16(p+6));
+			}
 			break;
 		case 0x7E: // RK
-			if(to_cell_p(p))
+			if (to_cell_p(p)) {
 				print_rk(g16(p+4), g32(p+6));
+			}
 			break;
 		case 0xBD: { // MULRK
 				u8 *q = p + rr.l - 11;
@@ -642,8 +649,12 @@ void print_sheet(int o, u8 *name, int nr)
 				for(;;) {
 					unsigned xf = g16(p+4);
 					p += 6;
-					if(f) print_rk(xf, g32(p));
-					if(p>=q) break;
+					if (f) {
+						print_rk(xf, g32(p));
+					}
+					if (p>=q) {
+						break;
+					}
 					f = to_nx_cell();
 				}
 			} break;
@@ -677,8 +688,9 @@ number:
 		}
 		pvrec = rr.id;
 
-		if(g.row > g.bottom)
+		if(g.row > g.bottom) {
 			break;
+		}
 	}
 	putchar('\n');
 }
