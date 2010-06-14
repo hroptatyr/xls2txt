@@ -276,7 +276,8 @@ static void getstr(u16 *d, u8 *p, int l)
 		while(--l>=0) d[l] = p[l];
 }
 
-static void parse_fmt(struct fmt *f, u16 *p, int l)
+static void
+parse_fmt(struct fmt *f, u16 *p, int l)
 {
 	u16 *e = p + l;
 	u16 *q, *d;
@@ -284,32 +285,39 @@ static void parse_fmt(struct fmt *f, u16 *p, int l)
 	f->type = 0;
 	f->arg = 0;
 
-	if(e==p) return;
-	q = p;
-	while(*q=='[') {
-		do
-			if(++q==e) return;
-		while(*q!=']');
-		if(++q==e) return;
+	if (e == p) {
+		return;
 	}
-	if(*p=='Y'||*p=='M'||*p=='D') {
+	q = p;
+	while (*q=='[') {
+		do {
+			if (++q == e) {
+				return;
+			}
+		} while(*q != ']');
+		if (++q == e) {
+			return;
+		}
+	}
+	if (*p == 'Y'|| *p == 'M'|| *p == 'D') {
 		f->type = 5;
 		return;
 	}
-	if(*p=='h'||*p=='m') {
+	if (*p == 'h'|| *p == 'm') {
 		f->type = 4;
 		return;
 	}
 
 	p = q;
 	d = 0;
-	for(;;) {
-		if(*q=='.') {
+	for (;;) {
+		if (*q == '.') {
 			d = q;
 			break;
 		}
-		if(*q>=128 || !strchr("0#?, ", *q) || ++q==e)
+		if (*q>=128 || !strchr("0#?, ", *q) || ++q==e) {
 			break;
+		}
 	}
 	if(!d) {
 		if(p!=q && (q==e || *q!='/')) {
@@ -318,12 +326,15 @@ static void parse_fmt(struct fmt *f, u16 *p, int l)
 		}
 		return;
 	}
-	while(++q<e)
-		if(*q!='0' && *q!='#')
+	while (++q < e) {
+		if (*q != '0' && *q != '#') {
 			break;
+		}
+	}
 
-	f->arg = q-d-1;
+	f->arg = q - d - 1;
 	f->type = 1;
+	return;
 }
 
 static void
@@ -351,9 +362,11 @@ set_fmt(u8 *p)
 	getstr(t, q, l);
 	fmt = (struct fmt*)tab_alloc(&x.fmt, n, &default_fmt);
 	parse_fmt(fmt, t, l);
+	return;
 }
 
-static const struct fmt *fmt_from_xf(int xf)
+static const struct fmt*
+fmt_from_xf(int xf)
 {
 	const struct fmt *fmt = &default_fmt;
 	int n, st, ua, org_xf;
@@ -369,13 +382,17 @@ bad_xf:
 
 again:
 	p = TAB(x.xf_ptr, u8*, xf);
-	if(!p) goto bad_xf;
+	if (!p) {
+		goto bad_xf;
+	}
 
-	if(x.biffv < BIFF5) { /* 0x02 */
+	if (x.biffv < BIFF5) {
+		/* 0x02 */
 		n = p[1];
 		st = 2;
 		ua = x.biffv < BIFF4 ? 3 : 5;
-	} else { /* 0xE0 */
+	} else {
+		/* 0xE0 */
 		n = g16(p+2);
 		st = 4;
 		ua = x.biffv < BIFF8 ? 7 : 9;
@@ -383,15 +400,19 @@ again:
 	st = p[st];
 	ua = p[ua];
 
-	if(!((st ^ ua) & 4)) { /* format not present */
-		if(!(st & 4) || xf!=org_xf) { /* not a style or loop */
+	if (!((st ^ ua) & 4)) {
+		/* format not present */
+		if (!(st & 4) || xf!=org_xf) {
+			/* not a style or loop */
 			p += x.biffv!=BIFF4 ? 4 : 2;
 			xf = g16(p) >> 4;
-			if(xf!=org_xf && xf < x.xf_ptr.nelem)
+			if (xf!=org_xf && xf < x.xf_ptr.nelem) {
 				goto again;
+			}
 		}
-	} else if(n < x.fmt.nelem)
+	} else if (n < x.fmt.nelem) {
 		fmt = &TAB(x.fmt, struct fmt, n);
+	}
 
 	*(const struct fmt**)tab_alloc(&x.xf_fmt, org_xf, &null_ptr) = fmt;
 	return fmt;
@@ -420,7 +441,7 @@ have_fmt:
 
 	switch (f->type) {
 	case 0:
-		if (ceil(v)==v) {
+		if (ceil(v) == v) {
 			printf("%.f", v);
 			break;
 		}
@@ -499,39 +520,48 @@ struct rr {
 	int o, l, id;
 };
 
-#define GETRR(P) \
-	if(4 > x.map.len-rr.o) TRUNC; \
-	rr.l = g16(x.map.ptr+rr.o+2); \
-	rr.id = x.map.ptr[rr.o]; \
-	rr.o += 4; \
-	if(rr.l > x.map.len-rr.o) TRUNC; \
-	(P) = x.map.ptr + rr.o; \
+#define GETRR(P)			 \
+	if (4 > x.map.len-rr.o) {	 \
+		TRUNC;			 \
+	}				 \
+	rr.l = g16(x.map.ptr+rr.o+2);	 \
+	rr.id = x.map.ptr[rr.o];	 \
+	rr.o += 4;			 \
+	if (rr.l > x.map.len-rr.o) {	 \
+		TRUNC;			 \
+	}				 \
+	(P) = x.map.ptr + rr.o;		 \
 	rr.o += rr.l;
 
 #define EXPLEN(L) if(rr.l < (L)) errx(1, "Record too short  &%d", __LINE__);
 
-static int skip_substream(int o)
+static int
+skip_substream(int o)
 {
 	struct rr rr;
-	int d=1;
+	int d = 1;
 	rr.o = o;
-	for(;;) {
+	for (;;) {
 		u8 *p, sv;
 		GETRR(p)
 		sv = p[-3];
 		switch(rr.id) {
 		case 0x09:
-			if(sv<0x10) d++;
+			if (sv<0x10) {
+				d++;
+			}
 			break;
 		case 0x0A:
-			if(!sv && !--d)
+			if (!sv && !--d) {
 				return rr.o;
+			}
 		}
 	}
 	TRUNC;
 }
 
-static int read_init_rr(int o)
+static int
+read_init_rr(int o)
 {
 	struct rr rr;
 	int sh, nr;
@@ -541,7 +571,7 @@ static int read_init_rr(int o)
 	rr.o = o;
 	nr = g.nr; sh = 0;
 
-	for(;;) {
+	for (;;) {
 		GETRR(p)
 
 		switch(rr.id) {
