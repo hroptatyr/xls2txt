@@ -261,19 +261,30 @@ static void xls_init_struc()
 
 	tab_alloc(&x.fmt, elemof(t)-1, &default_fmt);
 	tab = x.fmt.tab;
-	for(i=0;i<elemof(t);i++)
-		tab[i].type=t[i]>>4, tab[i].arg=t[i]&0xF;
+	for (i=0; i < elemof(t); i++) {
+		tab[i].type = t[i] >> 4;
+		tab[i].arg = t[i] & 0xf;
+	}
 }
 
-static void getstr(u16 *d, u8 *p, int l)
+static void
+getstr(u16 *d, u8 *p, int l)
 {
 	int v = 0;
-	if(x.biffv>=BIFF8) v = *p++ & 1;
+	if (x.biffv >= BIFF8) {
+		v = *p++ & 1;
+	}
 	// XXX
-	if(v)
-		while(--l>=0) d[l] = g16(p+2*l);
-	else
-		while(--l>=0) d[l] = p[l];
+	if (v) {
+		while (--l>=0) {
+			d[l] = g16(p+2*l);
+		}
+	} else {
+		while (--l>=0) {
+			d[l] = p[l];
+		}
+	}
+	return;
 }
 
 static void
@@ -319,7 +330,7 @@ parse_fmt(struct fmt *f, u16 *p, int l)
 			break;
 		}
 	}
-	if(!d) {
+	if (!d) {
 		if(p!=q && (q==e || *q!='/')) {
 //			f->arg = 0;
 			f->type = 1;
@@ -351,7 +362,7 @@ set_fmt(u8 *p)
 	}
 	n = x.biffv < BIFF5 ? x.fmt.nelem : g16(p);
 	l = q[-1];
-	if(x.biffv >= BIFF8) {
+	if (x.biffv >= BIFF8) {
 		l = g16(p+2), q++;
 	}
 
@@ -372,7 +383,7 @@ fmt_from_xf(int xf)
 	int n, st, ua, org_xf;
 	u8 *p;
 
-	if(xf >= x.xf_ptr.nelem) {
+	if (xf >= x.xf_ptr.nelem) {
 bad_xf:
 		warnx("Strange XF index %u -- ignored", xf);
 		return fmt;
