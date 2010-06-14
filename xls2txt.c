@@ -326,7 +326,8 @@ static void parse_fmt(struct fmt *f, u16 *p, int l)
 	f->type = 1;
 }
 
-static void set_fmt(u8 *p)
+static void
+set_fmt(u8 *p)
 {
 	u8 *q;
 	int n, l;
@@ -334,13 +335,18 @@ static void set_fmt(u8 *p)
 	u16 t[128];
 
 	q = p+1;
-	if(x.biffv >= BIFF4) q += 2;
+	if (x.biffv >= BIFF4) {
+		q += 2;
+	}
 	n = x.biffv < BIFF5 ? x.fmt.nelem : g16(p);
 	l = q[-1];
-	if(x.biffv >= BIFF8)
+	if(x.biffv >= BIFF8) {
 		l = g16(p+2), q++;
+	}
 
-	if(l > elemof(t)) return;
+	if (l > elemof(t)) {
+		return;
+	}
 
 	getstr(t, q, l);
 	fmt = (struct fmt*)tab_alloc(&x.fmt, n, &default_fmt);
@@ -537,15 +543,20 @@ static int read_init_rr(int o)
 		case 0x7E: // RK
 			return sh;
 		case 0x09: // BOF
-			if(p[-3]>=0x10) break;
+			if (p[-3]>=0x10) {
+				break;
+			}
 			rr.o = skip_substream(rr.o);
 			break;
 		case 0x0A: // EOF
-			if(p[-3]) break;
+			if (p[-3]) {
+				break;
+			}
 			return sh;
 		case 0x85: // SHEET
-			if(!nr--)
+			if(!nr--) {
 				sh = p - 4 - x.map.ptr;
+			}
 			break;
 		case 0x22: // DATEMODE
 			x.e1904 = p[0];
@@ -637,8 +648,9 @@ void print_sheet(int o, u8 *name, int nr)
 				}
 			} break;
 		case 0x03: // NUMBER
-			if(!to_cell_p(p))
+			if(!to_cell_p(p)) {
 				break;
+			}
 number:
 			print_fmt(g16(p+4), ieee754(g64(p+6)));
 			break;
@@ -647,18 +659,20 @@ number:
 				pvrec = 0;
 				break;
 			}
-			if(g16(p+6+6) != 0xFFFF) {
+			if (g16(p+6+6) != 0xFFFF) {
 				pvrec = 0;
 				goto number;
 			}
 			break;
 		case 0x07: // STRING
-			if(pvrec==0x06)
+			if (pvrec==0x06) {
 				print_str(p+2, g16(p));
+			}
 			break;
 		case 0xD6: // RSTRING
-			if(to_cell_p(p))
+			if (to_cell_p(p)) {
 				print_str(p+8, g16(p+6));
+			}
 			break;
 		}
 		pvrec = rr.id;
