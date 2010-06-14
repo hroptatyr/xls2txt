@@ -461,16 +461,20 @@ static void print_time(int m, int f, double v)
 	printf("%2u:%02u:%02u", tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
 
-static void print_rk(unsigned xf, u32 rk)
+static void
+print_rk(unsigned xf, u32 rk)
 {
 	double v;
-	if(rk & 2)
+	if (rk & 2) {
 		v = (s32)rk>>2;
-	else
+	} else {
 		v = ieee754((u64)(rk&~3) << 32);
-	if(rk & 1)
+	}
+	if (rk & 1) {
 		v /= 100;
+	}
 	print_fmt(xf, v);
+	return;
 }
 
 struct rr {
