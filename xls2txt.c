@@ -310,11 +310,11 @@ parse_fmt(struct fmt *f, u16 *p, int l)
 			return;
 		}
 	}
-	if (*p == 'Y' || *p == 'M' || *p == 'D' || *p == 'd') {
+	if (*p == 'Y' || *p == 'M' || *p == 'D' || *p == 'd' || *p == 'm') {
 		f->type = 5;
 		return;
 	}
-	if (*p == 'h'|| *p == 'm') {
+	if (*p == 'h') {
 		f->type = 4;
 		return;
 	}
@@ -411,7 +411,7 @@ again:
 	st = p[st];
 	ua = p[ua];
 
-	if (!((st ^ ua) & 4)) {
+	if (!((st ^ ua) & 4) && (st + ua != 1)) {
 		/* format not present */
 		if (!(st & 4) || xf!=org_xf) {
 			/* not a style or loop */
