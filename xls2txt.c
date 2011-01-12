@@ -1,5 +1,6 @@
 /*
  *	Copyright (C) 2005-2009 Jan Bobrowski <jb@wizard.ae.krakow.pl>
+ *	Copyright (c) 2011  Sebastian Freundt <freundt@ga-group.nl>
  *
  *	This program is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -693,12 +694,12 @@ void print_sheet(int o, u8 *name, int nr)
 			break;
 		case 0x04: // LABEL
 			if (to_cell_p(p)) {
-				print_str(p+8, g16(p+6));
+				print_str(p+8, g32(p+6));
 			}
 			break;
 		case 0xFD: // LABELSST
 			if (to_cell_p(p)) {
-				print_sst(g16(p+6));
+				print_sst(g32(p+6));
 			}
 			break;
 		case 0x7E: // RK
