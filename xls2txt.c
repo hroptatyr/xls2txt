@@ -14,7 +14,9 @@
 
 #include "xls2txt.h"
 #include <stdio.h>
-#include <getopt.h>
+#ifdef linux
+# include <getopt.h>
+#endif	/* linux */
 #include <time.h>
 #include <math.h>
 
