@@ -15,14 +15,14 @@ long
 u64;
 
 #ifdef __i386__
-#define g16(P) (*(u16*)(P))
-#define g32(P) (*(u32*)(P))
-#define g64(P) (*(u64*)(P))
+#define g16(P) (*(const u16*)(P))
+#define g32(P) (*(const u32*)(P))
+#define g64(P) (*(const u64*)(P))
 #define p16(P,V) (*(u16*)(P)=(V))
 #else
-static inline u16 g16(void *p) {return ((u8*)p)[0] | ((u8*)p)[1]<<8;}
-static inline u32 g32(void *p) {return g16(p) | g16((u8*)p+2)<<16;}
-static inline u64 g64(void *p) {return g32(p) | (u64)g32((u8*)p+4)<<32;}
+static inline u16 g16(const void *p) {return ((const u8*)p)[0] | ((const u8*)p)[1]<<8;}
+static inline u32 g32(const void *p) {return g16(p) | g16((const u8*)p+2)<<16;}
+static inline u64 g64(const void *p) {return g32(p) | (u64)g32((const u8*)p+4)<<32;}
 static inline void p16(void *p, u16 v) {((u8*)p)[0]=v; ((u8*)p)[1]=v>>8;}
 #endif
 

@@ -439,7 +439,7 @@ again:
 
 static void print_time(int m, int f, double v);
 
-print_fmt(u8 *xfp, double v)
+print_fmt(const u8 *xfp, double v)
 {
 	const struct fmt *f;
 	unsigned xf;
@@ -530,7 +530,7 @@ print_time(int m, int f, double v)
 }
 
 static void
-print_rk(u8 *xfp, u32 rk)
+print_rk(const u8 *xfp, u32 rk)
 {
 	double v;
 	if (rk & 2) {
