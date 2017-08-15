@@ -6,7 +6,7 @@ BINDEST = /usr/local/bin
 PKG=$(NAME)-$(VERSION)
 FILES = Makefile xls2txt.[ch] ole.c cp.c ummap.[ch] ieee754.c list.h myerr.h
 
-CFLAGS ?= -O2 -g
+CFLAGS ?= -O2 -g -Wall
 LDFLAGS = -lm
 
 xls2txt: xls2txt.o ole.o cp.o ummap.o ieee754.o
