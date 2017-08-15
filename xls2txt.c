@@ -1,6 +1,6 @@
 /*
- *	Copyright (C) 2005-2009 Jan Bobrowski <jb@wizard.ae.krakow.pl>
- *	Copyright (c) 2011  Sebastian Freundt <freundt@ga-group.nl>
+ *	Copyright (C) 2005-2011 Jan Bobrowski <jb@wizard.ae.krakow.pl>
+ *	Copyright (c) 2011-2017 Sebastian Freundt <freundt@ga-group.nl>
  *
  *	This program is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -9,6 +9,7 @@
 
 /*
  * Based on information from sc.openoffice.org/excelfileformat.pdf
+ * Some bugs spotted by Sebastian Freundt were fixed
  */
 
 #include "xls2txt.h"
@@ -25,6 +26,7 @@ struct g {
 	unsigned sel:1; // -n
 	unsigned nofmt:1;
 	unsigned titles:1;
+	unsigned biff2ok:1; // -2
 	int nr; // sheet number
 	int row, col; // current pos
 	unsigned top, bottom, left, right;
@@ -110,7 +112,10 @@ void check_biffv(u8 *p)
 	switch(p[1]) {
 	case 0:
 biff2:
-		errx(1, "BIFF2 not supported");
+		if (!g.biff2ok) {
+			errx(1, "Format not supported (BIFF2), try with -d");
+		}
+		v = BIFF2; goto ok;
 	case 2: v = BIFF3; goto ok;
 	case 4: v = BIFF4; goto ok;
 	case 8: break;
@@ -432,16 +437,26 @@ again:
 
 static void print_time(int m, int f, double v);
 
-static void
-print_fmt(unsigned xf, double v)
+print_fmt(u8 *xfp, double v)
 {
 	const struct fmt *f;
+	unsigned xf;
 
 	if (g.nofmt) {
 		printf("%f", v);
 		return;
 	}
 
+	if (x.biffv == BIFF2) {
+		int n = xfp[1] & 63;
+		f = &default_fmt;
+		if (n < x.fmt.nelem) {
+			f = &TAB(x.fmt, struct fmt, n);
+		}
+		goto have_fmt;
+	}
+
+	xf = g16(xfp);
 	if (xf < x.xf_fmt.nelem) {
 		f = TAB(x.xf_fmt, struct fmt*, xf);
 		if (f) {
@@ -513,7 +528,7 @@ print_time(int m, int f, double v)
 }
 
 static void
-print_rk(unsigned xf, u32 rk)
+print_rk(u8 *xfp, u32 rk)
 {
 	double v;
 	if (rk & 2) {
@@ -524,7 +539,7 @@ print_rk(unsigned xf, u32 rk)
 	if (rk & 1) {
 		v /= 100;
 	}
-	print_fmt(xf, v);
+	print_fmt(xfp, v);
 	return;
 }
 
@@ -694,7 +709,7 @@ void print_sheet(int o, u8 *name, int nr)
 			break;
 		case 0x04: // LABEL
 			if (to_cell_p(p)) {
-				print_str(p+8, g32(p+6));
+				print_str(p+8, x.biffv==BIFF2 ? p[7] : g16(p+6));
 			}
 			break;
 		case 0xFD: // LABELSST
@@ -704,17 +719,16 @@ void print_sheet(int o, u8 *name, int nr)
 			break;
 		case 0x7E: // RK
 			if (to_cell_p(p)) {
-				print_rk(g16(p+4), g32(p+6));
+				print_rk(p+4, g32(p+6));
 			}
 			break;
 		case 0xBD: { // MULRK
 				u8 *q = p + rr.l - 11;
 				int f = to_cell_p(p);
 				for(;;) {
-					unsigned xf = g16(p+4);
 					p += 6;
 					if (f) {
-						print_rk(xf, g32(p));
+						print_rk(p-2, g32(p));
 					}
 					if (p>=q) {
 						break;
@@ -722,21 +736,30 @@ void print_sheet(int o, u8 *name, int nr)
 					f = to_nx_cell();
 				}
 			} break;
+		case 0x02: // INTEGER
+			if (to_cell_p(p)) {
+				print_fmt(p+4, g16(p+7));
+			}
+			break;
 		case 0x03: // NUMBER
 			if(!to_cell_p(p)) {
 				break;
 			}
 number:
-			print_fmt(g16(p+4), ieee754(g64(p+6)));
+			print_fmt(p+4, ieee754(g64(x.biffv==BIFF2 ? p+7 : p+6)));
 			break;
 		case 0x06: // FORMULA
 			if(!to_cell_p(p)) {
 				pvrec = 0;
 				break;
 			}
-			if (g16(p+6+6) != 0xFFFF) {
+			if (x.biffv==BIFF2 || g16(p+6+6) != 0xFFFF) {
 				pvrec = 0;
 				goto number;
+			}
+			// p[6] == 0: STRING follows
+			if (p[6] == 1) {
+				printf("%s", p[6+2] ? "true" : "false");
 			}
 			break;
 		case 0x07: // STRING
@@ -966,7 +989,7 @@ int main(int argc, char *argv[])
 {
 	char o=0;
 
-	for(;;) switch(getopt(argc, argv, "n:AlC:a12P:fhV?-")) {
+	for(;;) switch(getopt(argc, argv, "n:AlC:a12P:fdhV?-")) {
 		int n;
 	case -1: goto endopt;
 	case 'n': g.sel=1; g.nr = atoi(optarg); break;
@@ -985,6 +1008,7 @@ int main(int argc, char *argv[])
 		if(n) set_codepage(n);
 		break;
 	case 'f': g.nofmt = 1; break;
+	case 'd': g.biff2ok = 1; break;
 	case '?':
 		if(optopt!='?') break;
 	case '-':
@@ -993,7 +1017,7 @@ int main(int argc, char *argv[])
 #define _STR(T) #T
 #define STR(T) _STR(T)
 		printf("xls2txt " STR(VERSION) " / "
-			"Copyright 2009 Jan Bobrowski / GPL\n");
+			"Copyright 2011 Jan Bobrowski / GPL\n");
 		goto usage;
 	}
 endopt:
