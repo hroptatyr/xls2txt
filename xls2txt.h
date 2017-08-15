@@ -2,7 +2,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <err.h>
+#include "myerr.h"
 
 typedef unsigned char u8;
 typedef unsigned short u16;
