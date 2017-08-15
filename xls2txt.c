@@ -439,6 +439,7 @@ again:
 
 static void print_time(int m, int f, double v);
 
+static void
 print_fmt(const u8 *xfp, double v)
 {
 	const struct fmt *f;
