@@ -1,10 +1,10 @@
 # gmake
 
 NAME = xls2txt
-VERSION = 0.12
+VERSION = 0.15
 BINDEST = /usr/local/bin
 PKG=$(NAME)-$(VERSION)
-FILES = Makefile xls2txt.[ch] ole.c cp.c ummap.[ch] ieee754.c list.h
+FILES = Makefile xls2txt.[ch] ole.c cp.c ummap.[ch] ieee754.c list.h myerr.h
 
 CFLAGS ?= -O2 -g
 LDFLAGS = -lm

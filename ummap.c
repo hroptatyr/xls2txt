@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h> // ffs
-#include <err.h>
+#include "myerr.h"
 #include "ummap.h"
 
 unsigned um_page_sz, um_page_sc;
