@@ -56,7 +56,6 @@ static void um_sig(int n, siginfo_t *i, void *c)
 				goto found;
 		}
 	}
-	fprintf(stderr, "si_code %d\n", i->si_code);
 	return;
 
 found:
