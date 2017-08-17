@@ -1,0 +1,22 @@
+language: c
+
+sudo: false
+
+os:
+  - osx
+
+compiler:
+  - clang
+
+script:
+  - make
+  - make check
+
+## whitelist
+branches:
+  only:
+    - bld/macos
+
+notifications:
+  email:
+    - devel@fresse.org
