@@ -15,6 +15,7 @@ script:
 ## whitelist
 branches:
   only:
+    - bld/macos
     - master
 
 notifications:
