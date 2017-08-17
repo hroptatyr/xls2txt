@@ -61,7 +61,7 @@ static meml_t mmap_fd(int fd) {
 	meml_t m;
 	if(fstat(fd, &st)<0) err(1, "fstat");
 	m.ptr = mmap(0, st.st_size, PROT_READ, MAP_SHARED, ole.fd, 0);
-	if((long)m.ptr==-1) err(1, "mmap");
+	if(m.ptr==MAP_FAILED) err(1, "mmap");
 	m.len = st.st_size;
 	return m;
 }

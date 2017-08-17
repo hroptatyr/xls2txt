@@ -25,4 +25,8 @@ dist:
 	tar czf $(PKG).tar.gz --group=root --owner=root $(addprefix $(PKG)/, $(FILES)); \
 	rm $(PKG)
 
-.PHONY: install clean dist
+check: xls2txt
+	./$< -l Workbook1.xls
+	./$< Workbook1.xls
+
+.PHONY: install clean dist check
