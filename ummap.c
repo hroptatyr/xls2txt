@@ -67,7 +67,7 @@ int um_access_page(void *p)
 		p, um_page_sz,
 		PROT_READ|PROT_WRITE,
 		MAP_PRIVATE|MAP_ANON|MAP_FIXED,
-		-1, 0) == -1 ? -1 : 0;
+		-1, 0) == MAP_FAILED ? -1 : 0;
 #else
 	return mprotect(p, um_page_sz, PROT_READ|PROT_WRITE);
 #endif
