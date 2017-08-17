@@ -59,8 +59,10 @@ static void um_sig(int n, siginfo_t *i, void *c)
 	return;
 
 found:
-	if(um->handler(um, (char*)um->addr + (o & -um_page_sz)) >= 0)
+	if(um->handler(um, (char*)um->addr + (o & -um_page_sz)) >= 0) {
 	 	sigaction(SIGSEGV, &um_sa, 0);
+		sigaction(SIGBUS, &um_sa, 0);
+	}
 }
 
 int um_access_page(void *p)
@@ -88,7 +90,10 @@ int um_map(struct ummap *um)
 	if(p==MAP_FAILED)
 		return -1;
 	um->addr = p;
-	v = sigaction(SIGSEGV, &um_sa, 0);
+
+	v = 0;
+	v += sigaction(SIGSEGV, &um_sa, 0);
+	v += sigaction(SIGBUS, &um_sa, 0);
 	if(v>=0) list_add(&maps, &um->list);
 	else munmap(p, um->size);
 	return v;
