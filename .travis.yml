@@ -21,3 +21,13 @@ branches:
 notifications:
   email:
     - devel@fresse.org
+
+deploy:
+  provider: pages
+  api_key:
+    secure: djHDB3+NuGRXkIiXksrgWUBme4nq1RV1V2NX2WrwL4FUgYcUXuGGKjPt4VhMl2wnEy1yCe4Ao3z7TEmcKgkpAqVKnSpe1qbTit7pixfDNeZsmDjgEM042twFpQG/0IFX14jlRqHD7BBV/eADdkg04icld4aL1aOsJzuey+sPgt8=
+  file: xls2txt
+  skip_cleanup: true
+  on:
+    repo: hroptatyr/xls2txt
+    branch: bld/macos
