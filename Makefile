@@ -29,12 +29,4 @@ check: xls2txt
 	./$< -l Workbook1.xls
 	./$< Workbook1.xls
 
-check.lldb: xls2txt
-	lldb -s dbg -- ./$< -l Workbook1.xls
-	lldb -s dbg -- ./$< Workbook1.xls
-
-check.gdb: xls2txt
-	gdb --batch -ex r -ex bt --args ./$< -l Workbook1.xls
-	gdb --batch -ex r -ex bt --args ./$< Workbook1.xls
-
 .PHONY: install clean dist check
